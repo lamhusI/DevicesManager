@@ -84,6 +84,57 @@
 
         </div>
 
+
+        <!-- G-code Sender -->
+        <div class="grid container"
+            style="display: grid; grid-auto-flow: column; grid-auto-rows: auto; 
+                    grid-template-columns: [left] 66.67% [right] 33.33%; margin-top: 10px;">
+          <div class="item3" style="grid-area: auto / left;">
+            <div class="row align-items-center">
+
+              <div class="col-12 col-sm-3">
+                <h5>Manual G-code</h5>
+              </div>
+
+              <div class="col-sm-6">
+                <input class="form-control text-input"
+                      type="text"
+                      id="manual_gcode"
+                      name="manual_gcode"
+                      placeholder="Enter G-code (e.g. G1 X10 Y10 Z5)"
+                      style="width: 100%;">
+              </div>
+
+              <div class="col-sm-3">
+                <button type="button"
+                        class="white-background-button"
+                        onclick="sendManualGCode()">
+                  Send G-code
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+      
+
+
+
+
+
+        
+
+
+
           <div class="grid container"
         style="display: grid;grid-auto-flow: column;grid-auto-rows: auto;grid-template-columns: [left] 66.67% [right] 33.33%;">
               <div class="item3" style="grid-area: auto / left;">
