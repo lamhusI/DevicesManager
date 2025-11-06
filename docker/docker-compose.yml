@@ -196,18 +196,21 @@ services:
 
 
   # image analysis extractor
-  image_analysis:
-    image: image_analysis
-    restart: unless-stopped
-    networks:
-      - clowder
-    depends_on:
-      - rabbitmq
-      - clowder
-    environment:
-      - RABBITMQ_URI=${RABBITMQ_URI:-amqp://guest:guest@rabbitmq/%2F}
-    volumes:
-      - /Users/polyprintlab/clowder/data:/home/clowder/data:ro
+  #IM COMMENTING THIS OUT
+  
+  #image_analysis:
+   # image: image_analysis
+    #restart: unless-stopped
+    #networks:
+     # - clowder
+    #depends_on:
+     # - rabbitmq
+     # - clowder
+    #environment:
+     # - RABBITMQ_URI=${RABBITMQ_URI:-amqp://guest:guest@rabbitmq/%2F}
+    #volumes:
+     # - /Users/polyprintlab/clowder/data:/home/clowder/data:ro
+    
     # ports:
     #   - 5000:5000
   # ----------------------------------------------------------------------
