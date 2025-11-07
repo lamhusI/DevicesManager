@@ -81,7 +81,7 @@ services:
       - "traefik.frontend.rule=${TRAEFIK_HOST:-}PathPrefix: ${CLOWDER_CONTEXT:-/}"
     volumes:
       - clowder-custom:/home/clowder/custom
-      - /Users/polyprintlab/clowder/volumns/data:/home/clowder/data:rw
+      #- /Users/polyprintlab/clowder/volumns/data:/home/clowder/data:rw
     command:
           - /home/clowder/clowder.sh
           - -mem 4096
