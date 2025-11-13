@@ -34,6 +34,13 @@ class DeviceConnector(object):
         self.connection = pika.BlockingConnection(parameters)
         self.channel = self.connection.channel()
         self.channel.basic_qos(prefetch_count=1)
+        # Declare exchange FIRST (must exist before binding any queue)
+        self.channel.exchange_declare(
+            exchange=self.EXCHANGE_NAME,
+            exchange_type='direct',
+            durable=True
+        )
+        #Then declare and bind queue if needed
         if self.queue_name is not None:
             self.channel.queue_declare(queue=self.queue_name, durable=True)
             self.channel.queue_bind(
