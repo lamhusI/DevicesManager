@@ -30,7 +30,7 @@ __logger = logging.getLogger("user_events.py")
 
 userbp = Blueprint('user_events', __name__, url_prefix=Config.URL_PREFIX+'/user-events')
 
-# rpcDeviceReceiver = RpcDevicesReceiver()
+#rpcDeviceReceiver = RpcDevicesReceiver()
 
 @userbp.route('/', methods=['GET', 'POST'])
 @role_required("user")
@@ -85,7 +85,9 @@ def user_events():
             session['per_page'] = per_page
         offset = (page - 1) * per_page
 
-        response = rpcDeviceReceiver.get_device_status()
+        #response = rpcDeviceReceiver.get_device_status()
+        response = [ ]
+
         if page <= 0 or offset >= len(response):
             offset = 0
             page = 1
