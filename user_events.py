@@ -822,9 +822,8 @@ def send_gcode():
     """
     Receives manual G-code from frontend and sends it to the printer via RabbitMQ.
     """
-    from .utilities.rabbitMQ.connector import DeviceConnector
     from flask import request, jsonify
-    import json
+    import pika, json
 
     data = request.get_json()
     gcode = data.get("gcode")
@@ -833,19 +832,33 @@ def send_gcode():
         return jsonify({"status": "error", "message": "No G-code provided"}), 400
 
     try:
-        connector = DeviceConnector(queue_name=None, routing_key="printer_movement")
-        connector.connect()
+        # Connect to local RabbitMQ broker
+        parameters = pika.URLParameters("amqp://guest:guest@localhost/%2F")
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.exchange_declare(exchange="devices_manager", exchange_type="direct", durable=True)
 
-        payload = {
+        # Create payload for adaptor
+        message = {
             "type": "manual_gcode",
             "data": gcode
         }
 
-        connector.send_message("printer_movement", json.dumps(payload))
+        # Send to the same queue adaptor listens to
+        channel.basic_publish(
+            exchange="devices_manager",
+            routing_key="device_status",  # adaptor binds this key in listen_device_status()
+            body=json.dumps(message)
+        )
+
+        connection.close()
+
+        print(f"Sent manual G-code: {gcode}")
         return jsonify({"status": "success", "message": f"G-code '{gcode}' sent successfully!"})
     except Exception as e:
         print("Error sending G-code:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 
 @userbp.route('/event/publish/<platformEventId>',  methods=['GET'])
