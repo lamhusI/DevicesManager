@@ -607,6 +607,36 @@
         imgElement.style.display = 'none'; // Hide the image if it fails to load
     }
 
+    function sendManualGCode() {
+        const gcode = document.getElementById('manual_gcode').value;
+
+        if (!gcode) {
+          alert("Please enter a G-code command first!");
+          return;
+        }
+
+        fetch("/structural-color-printing/user-events/send_gcode", {
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ gcode: gcode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+          alert(`Sent: ${gcode}`);
+          document.getElementById('manual_gcode').value = '';
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+      console.error('Error sending G-code:', error);
+      alert('Something went wrong while sending the G-code.');
+    });
+  }
+
 
     </script>
 

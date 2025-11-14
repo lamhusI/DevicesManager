@@ -4,6 +4,7 @@ import random
 import json
 import re
 import time
+import serial
 
 # from scripts import clowder
 # from ximea_camera import XimeaCamera
@@ -28,6 +29,14 @@ except:
     lulzbot = None
     tool_passed = False
     lulzbot_passed = False
+    ender = None
+try:
+    ender_port = "/dev/tty.usbserial-1110"  # Lamyas Ender port
+    ender = serial.Serial(ender_port, 115200, timeout=5)
+    time.sleep(2)
+    print(f" Connected to Ender 3 on {ender_port}")
+except Exception as e:
+    print(f"Could not connect to Ender printer: {e}")
 EXCHANGE_NAME = 'devices_manager'
 # parameters = pika.URLParameters('amqp://devicesmanager:password@141.142.216.87/%2F')
 parameters = pika.URLParameters('amqp://guest:guest@localhost/%2F')
@@ -177,30 +186,52 @@ def get_devices_status():
             status = lulzbot_passed
         devicesStatusList.append({'_id': deviceId, 'title': deviceTitle, 'isConnected': status})
     return devicesStatusList
+#####New additions to this: 
 def on_request(ch, method, props, body):
     status = None
     message = json.loads(body)
     type = message['type']
     print("process: " + type)
+
     if type == 'device_status':
         status = json.dumps(get_devices_status())
         send_message('device_status_update', status)
+
     elif type == 'pcp_commands':
         send_pcp_commands(message)
         status = "OK"
+
     elif type == 'printing_params':
         send_printing_params(message)
         status = "OK"
+
+    # Manual G-code handler for Ender I added 
+    elif type == 'manual_gcode':
+        gcode = message.get('data')
+        print(f"Received manual G-code: {gcode}")
+        if ender:
+            try:
+                ender.write((gcode + "\n").encode())
+                ender.flush()
+                print(f"Sent to Ender 3: {gcode}")
+            except Exception as e:
+                print(f"Failed to send G-code to Ender: {e}")
+        else:
+            print("Ender printer not connected.")
+        status = "OK"
+
     elif type == 'activate':
         if message['data'] == 'tool':
             if tool is not None:
                 status = tool.activate()
         elif message['data'] == 'lulzbot':
             if lulzbot is not None:
-                status =lulzbot.activate()
-                #TODO: update printer_start_pos?
+                status = lulzbot.activate()
+                # TODO: update printer_start_pos?
+
         # TODO: update device status
         # send_message('device_status_update', status)
+
     elif type == 'deactivate':
         if message['data'] == 'tool':
             if tool is not None:
@@ -211,6 +242,7 @@ def on_request(ch, method, props, body):
                 # TODO: update printer_start_pos, set to None?
         # TODO: update device status
         # send_message('device_status_update', status)
+
 def send_message(routing_key, message):
     channel.basic_publish(
         exchange=EXCHANGE_NAME, routing_key=routing_key, body=message)
